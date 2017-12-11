@@ -1,6 +1,7 @@
 from QLearner import QLearner
 from hand_state import hand_state
 import numpy as np
+from decimal import *
 class poker_learner():
     def __init__(self,learners=None):
         self.cards = [i for i in range(52)]
@@ -48,7 +49,9 @@ class poker_learner():
     def _get_raise_state(self, amount):
         if self.pot == 0:
             self.pot = amount
-        a = float(amount)/self.pot
+        a = amount / self.pot
+        if a == 0:
+	        a = Decimal(amount)/self.pot
         if a < 1:
             return int(a * 10)
         elif a == 1:
@@ -102,12 +105,9 @@ class poker_learner():
 
     def save(self):
         for i in range(4):
-            f = open("learners/" + str(i),'w+')
-            f.write(str(self.learners[i].Q))
-            f.close()
+            np.save('learners/'+str(i)+'.npy', self.learners[i].Q)
 
     def load(self):
         for i in range(4):
-            f = open("./learners/" + str(i), 'r')
-            self.learners[i].Q = eval(f.read())
-            f.close()
+            self.learners[i].Q = np.load('learners/'+str(i)+'.npy')[()]
+            print "Loaded Qlearner: " + str(i)

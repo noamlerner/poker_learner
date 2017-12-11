@@ -4,25 +4,32 @@ import numpy as np
 class game():
     def __init__(self):
         self.big_blind = 100
-        self.training_iterations = 99999900
+        self.training_iterations = 300000
         self.players = [poker_learner()]
+        self.players[0].load()
         for i in range(8):
             self.players.append(poker_learner(learners=self.players[0].learners))
         self.engine = poker_engine()
         self.folded = []
         self.num_players = 9
         self.verbose = True
+        self.save_on_iteration = 100000
+        self.report_on_iteration = 1000
         for player in self.players:
             player.big_blind = self.big_blind
     def train(self):
+        print "Starting To Train"
         for i in range(self.training_iterations):
             self.num_players = np.random.randint(3, 9)
             self.folded = []
             self.engine.init_game_for(self.num_players)
             self._train_iteration()
-            if i % 100 == 0:
+            if i % self.report_on_iteration == 0:
+                print "Reached Iteration " + str(i)
+                print "RAR at: " + str(self.players[0].learners[0].rar)
+            if i % self.save_on_iteration == 0 and i != 0:
+                print "Starting to Save"
                 self.players[0].save()
-                if self.verbose: print "Reached Iteration " + str(i)
     def _show_flop(self):
         for i in range(self.num_players):
             self.players[i].flop_shown(self.engine.flop)
@@ -147,5 +154,13 @@ class game():
             self.raises(player,raise_to)
             return  raise_to
         return need_to_call
+g = game()
+g.train()
+g = game()
+g.train()
+g = game()
+g.train()
+g = game()
+g.train()
 g = game()
 g.train()

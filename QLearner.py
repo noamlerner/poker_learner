@@ -9,17 +9,16 @@ class QLearner(object):
     def __init__(self, \
         num_states=100, \
         num_actions = 4, \
-        alpha = 0.2, \
+        alpha = 0.3, \
         gamma = 0.9, \
-        rar = 0.9, \
-        radr = 0.999, \
+        rar = 0.9999999999, \
+        radr = 0.999999, \
         verbose = False):
         self.verbose = verbose
         self.num_actions = num_actions
         self.num_states = num_states
         self.alpha = alpha
         self.gamma = gamma
-        self.s = 0
         self.rar = rar
         self.radr = radr
         self.Q = {}
@@ -30,14 +29,24 @@ class QLearner(object):
         @param s: The new state
         @returns: The selected action
         """
-        if self.s not in self.Q or self._shouldTakeRandomAction():
+        if s not in self.Q or self._shouldTakeRandomAction():
+            a = rand.randint(0, self.num_actions - 1)
+        else:
+            a = self._bestAction(actions=self.Q[s])
+        return a
+
+    def query(self, s):
+        if s not in self.Q:
+            print "Have Not Seen State"
             a = rand.randint(0, self.num_actions - 1)
         else:
             a = self._bestAction(actions=self.Q[s])
         return a
 
     def _shouldTakeRandomAction(self):
-        return np.random.choice(2,p=[1-self.rar, self.rar])
+        self.rar = self.rar * self.radr
+        choice =  np.random.choice(2,p=[1-self.rar, self.rar])
+        return  choice
 
     def _bestAction(self, actions):
         takeAction = 0
